@@ -1,8 +1,8 @@
 body {
-    background: #333333;
-    font-family: 'Courier New', Courier, monospace;
-    color: #ffffcc;
-    text-align: center;
+  background: #333333;
+  font-family: 'Courier New', Courier, monospace;
+  color: #ffffcc;
+  text-align: center;
 }
 
 h1 {
@@ -10,41 +10,41 @@ h1 {
 }
 
 .container {
-    width: 600px;
-    margin: auto;
-    padding: 20px;
-    border: 3px solid #ffffcc;
-    background: #333333;
-    border-radius: 10px;
+  width: 600px;
+  margin: auto;
+  padding: 20px;
+  border: 3px solid #ffffcc;
+  background: #333333;
+  border-radius: 10px;
 }
 
 textarea {
-    width: 95%;
-    height: 80px;
-    margin: 5px;
+  width: 95%;
+  height: 80px;
+  margin: 5px;
 }
 
 button {
-    background: #ffffcc;
-    color: #333333;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
+  background: #ffffcc;
+  color: #333333;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
 }
 
 button:hover {
-    background: #cccccc;
+  background: #cccccc;
 }
 
 #chat {
-    height: 200px;
-    overflow-y: auto;
-    border: 2px solid #333333;
-    background: #333333;
-    padding: 10px;
-    margin-top: 10px;
+  height: 200px;
+  overflow-y: auto;
+  border: 2px solid #333333;
+  background: #333333;
+  padding: 10px;
+  margin-top: 10px;
 }
 
 .pigeon {
-    font-size: 20px;
+  font-size: 20px;
 }

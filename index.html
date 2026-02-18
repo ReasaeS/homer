@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Homer</title>
+    <style>
+      body {
+        background: #333333;
+        font-family: 'Courier New', Courier, monospace;
+        color: #ffffcc;
+        text-align: center;
+      }
+
+      h1 {
+          color: #ffffcc;
+      }
+
+      .container {
+        width: 600px;
+        margin: auto;
+        padding: 20px;
+        border: 3px solid #ffffcc;
+        background: #333333;
+        border-radius: 10px;
+      }
+
+      textarea {
+        width: 95%;
+        height: 80px;
+        margin: 5px;
+      }
+
+      button {
+        background: #ffffcc;
+        color: #333333;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #cccccc;
+      }
+
+      #chat {
+        height: 200px;
+        overflow-y: auto;
+        border: 2px solid #333333;
+        background: #333333;
+        padding: 10px;
+        margin-top: 10px;
+      }
+
+      .pigeon {
+        font-size: 20px;
+      }
+    </style>
+
+</head>
+
+<body>
+
+  <h1>Homer</h1>
+
+  <div class="container">
+    <p class="pigeon">Dispatch scrolls.</p>
+
+    <button onclick="createOffer()">Release Royal Pigeon (Create Offer)</button>
+    <button onclick="createAnswer()">Receive Royal Pigeon (Create Answer)</button>
+    <button onclick="showHelp()">Help?</button>
+
+    <h3>Status:</h3>
+    <p id="status">Idle</p>
+
+    <h3>Royal Scroll (SDP)</h3>
+    <textarea id="localSDP" placeholder="Your royal scroll appears here..."></textarea>
+
+    <h3>Received Scroll</h3>
+    <textarea id="remoteSDP" placeholder="Paste the other noble scroll here..."></textarea>
+
+    <button onclick="setRemote()">Seal the Pact</button>
+
+    <hr>
+
+    <h3>Send Message by Pigeon</h3>
+    <input type="text" id="messageBox" placeholder="Write thy noble message..." size="40">
+    <button onclick="sendMessage()">Send Pigeon</button>
+
+    <div id="chat"></div>
+  </div>
+
+  <script>
+    var peerConnection;
+    var dataChannel;
+
+    var configuration = {
+        iceServers: [
+            { urls: "stun:stun.l.google.com:19302" }
+        ]
+    };
+
+    function updateStatus(msg) {
+        document.getElementById("status").innerText = msg;
+    }
+
+    function showHelp() {
+      alert(
+        "Royal Pigeon Messenger Instructions:\n\n" +
+        "1. Open the app in two browsers (or devices).\n" +
+        "2. On Browser A: Click 'Release Royal Pigeon (Create Offer)'.\n" +
+        "3. Copy the SDP scroll from 'Royal Scroll (SDP)' and paste it into Browser B's 'Received Scroll'.\n" +
+        "4. On Browser B: Click 'Receive Royal Pigeon (Create Answer)'.\n" +
+        "5. Copy Browser B's scroll back into Browser A's 'Received Scroll'.\n" +
+        "6. Click 'Seal the Pact' on Browser A.\n" +
+        "7. Once status shows 'Pigeon Route Charted!', you can send messages.\n\n" +
+        "Note: Scrolls are temporary. Recreate if connection fails."
+      );
+    }
+
+    function createConnection() {
+      peerConnection = new RTCPeerConnection(configuration);
+
+      peerConnection.ondatachannel = function(event) {
+        dataChannel = event.channel;
+        setupDataChannel();
+      };
+
+      peerConnection.onicecandidate = function(event) {
+        if (!event.candidate) {
+          document.getElementById("localSDP").value =
+            JSON.stringify(peerConnection.localDescription);
+          updateStatus("SDP generated, ready to copy scroll.");
+        }
+      };
+    }
+
+    function createOffer() {
+      updateStatus("Creating offer… Please wait.");
+      createConnection();
+
+      dataChannel = peerConnection.createDataChannel("royalPigeon");
+      setupDataChannel();
+
+      peerConnection.createOffer().then(function(offer) {
+        return peerConnection.setLocalDescription(offer);
+      }).then(function() {
+        updateStatus("Offer created! Copy your scroll to send to peer.");
+      });
+    }
+
+    function createAnswer() {
+      updateStatus("Creating answer… Please wait.");
+      createConnection();
+
+      var remoteDesc = new RTCSessionDescription(
+        JSON.parse(document.getElementById("remoteSDP").value)
+      );
+
+      peerConnection.setRemoteDescription(remoteDesc).then(function() {
+        return peerConnection.createAnswer();
+      }).then(function(answer) {
+        return peerConnection.setLocalDescription(answer);
+      }).then(function() {
+        updateStatus("Answer created! Copy your scroll back to the other peer.");
+      });
+    }
+
+    function setRemote() {
+        var remoteDesc = new RTCSessionDescription(
+          JSON.parse(document.getElementById("remoteSDP").value)
+        );
+
+        peerConnection.setRemoteDescription(remoteDesc);
+        updateStatus("Remote scroll applied. Waiting for connection…");
+    }
+
+    function setupDataChannel() {
+      dataChannel.onopen = function() {
+        addMessage("Pigeon Route Charted!");
+        updateStatus("Connection established! You may send messages.");
+      };
+
+      dataChannel.onmessage = function(event) {
+        addMessage("Scroll Received: " + event.data);
+      };
+    }
+
+    function sendMessage() {
+      var message = document.getElementById("messageBox").value;
+
+      if (!dataChannel || dataChannel.readyState !== "open") {
+        alert("The pigeon has not yet taken flight.");
+        return;
+      }
+
+      dataChannel.send(message);
+      addMessage("Scroll Sent: " + message);
+      document.getElementById("messageBox").value = "";
+    }
+
+    function addMessage(text) {
+      var chat = document.getElementById("chat");
+      var p = document.createElement("p");
+      p.innerHTML = text;
+      chat.appendChild(p);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
